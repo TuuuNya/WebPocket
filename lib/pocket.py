@@ -5,6 +5,7 @@ from colorama import Fore, Style
 from tabulate import tabulate
 from importlib import import_module
 from lib.ExploitOption import ExploitOption
+from lib.exception.Module import ModuleNotUseException
 
 
 class Pocket(Cmd):
@@ -45,8 +46,7 @@ class Pocket(Cmd):
 
     def do_show(self, content):
         if not self.module_instance:
-            self.perror("Please use a module", traceback_war=False)
-            return
+            raise ModuleNotUseException()
 
         if content == "info":
             info = self.module_instance.get_info()
@@ -76,6 +76,9 @@ class Pocket(Cmd):
             )
 
     def do_exploit(self, args):
+        if not self.module_instance:
+            raise ModuleNotUseException()
+
         exploit_result = self.module_instance.exploit()
         self.poutput("{style}[+]{style_end} {message}".format(
             style=Fore.YELLOW + Style.BRIGHT,
