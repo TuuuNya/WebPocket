@@ -1,14 +1,16 @@
 from lib.cmd2 import Cmd
 from utils.files import ROOT_PATH
+from utils.module import name_convert
 from pathlib import Path
 from colorama import Fore, Style
 from tabulate import tabulate
 from importlib import import_module
+from lib.Database import Database
 from lib.ExploitOption import ExploitOption
 from lib.exception.Module import ModuleNotUseException
 
 
-class Pocket(Cmd):
+class Pocket(Cmd, Database):
     colors = "Always"
 
     console_prompt = "{COLOR_START}WebPocket{COLOR_END}".format(COLOR_START="\033[4m", COLOR_END="\033[0m")
@@ -17,7 +19,8 @@ class Pocket(Cmd):
     module_instance = None
 
     def __init__(self):
-        super().__init__()
+        super(Pocket, self).__init__()
+        Database.__init__(self)
         self.prompt = self.console_prompt + self.console_prompt_end
         self.hidden_commands.extend(['alias', 'edit', 'macro', 'py', 'pyscript', 'shell', 'shortcuts', 'load'])
 
@@ -32,7 +35,7 @@ class Pocket(Cmd):
         self.module_instance.options.set_option(arg, value)
 
     def do_use(self, module_name):
-        module_file = "{ROOT}/modules/{MODULE}.py".format(ROOT=ROOT_PATH, MODULE=module_name)
+        module_file = name_convert(module_name)
         module_type = module_name.split("/")[0]
 
         if Path(module_file).is_file():
@@ -93,6 +96,10 @@ class Pocket(Cmd):
             style=Fore.BLUE + Style.BRIGHT,
             style_end=Style.RESET_ALL
         ))
+
+    def do_db_rebuild(self, args):
+        self.db_rebuild()
+        self.poutput("Database rebuild done.", color=Fore.GREEN)
 
     def set_prompt(self, module_type, module_name):
         module_prompt = " {module_type}({color}{module_name}{color_end})".format(

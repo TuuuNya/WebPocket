@@ -1,4 +1,4 @@
-from lib.pocket import Pocket
+from lib.Pocket import Pocket
 
 
 class WebPocket(Pocket):
