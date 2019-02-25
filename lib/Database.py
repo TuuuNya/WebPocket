@@ -39,6 +39,7 @@ class Database:
             '"disclosure_date" TEXT,'
             '"service_name" TEXT,'
             '"service_version" TEXT,'
+            '"check" TEXT,'
             'PRIMARY KEY("id")'
             ');'
         )
@@ -46,17 +47,19 @@ class Database:
 
     def delete_table(self):
         delete_table_sql = "delete from modules;"
-        self.cursor.execute(delete_table_sql)
+        with self.connection:
+            self.connection.execute(delete_table_sql)
 
     def insert_module(self, info):
         with self.connection:
             self.connection.execute(
                 "insert into modules \
-                (name, module_name, description, author, 'references', disclosure_date, service_name, service_version) \
-                values (?, ?, ?, ?, ?, ?, ?, ?)",
+                (name, module_name, description, author, 'references', disclosure_date, service_name,"
+                "service_version, 'check') \
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (info.get('name'), info.get('module_name'), info.get('description'), '|'.join(info.get('author')),
                  '|'.join(info.get('references')), info.get('disclosure_date'), info.get('service_name'),
-                 info.get('service_version'))
+                 info.get('service_version'), info.get('check'))
             )
 
     def db_rebuild(self):
@@ -76,4 +79,14 @@ class Database:
                     module_instance = module_class.Exploit()
                     module_info = module_instance.get_info()
                     module_info['module_name'] = module_name
+                    try:
+                        getattr(module_instance, 'check')
+                        module_info['check'] = 'True'
+                    except AttributeError:
+                        module_info['check'] = 'False'
                     self.insert_module(module_info)
+
+    def get_modules(self):
+        sql = "select `module_name`, `check`, `disclosure_date`, `description` from modules;"
+        rs = self.cursor.execute(sql)
+        return rs.fetchall()

@@ -25,7 +25,9 @@ class Pocket(Cmd, Database):
         self.hidden_commands.extend(['alias', 'edit', 'macro', 'py', 'pyscript', 'shell', 'shortcuts', 'load'])
 
     def do_list(self, args):
-        self.poutput("list all module")
+        modules = self.get_modules()
+        self.poutput("Module List:", "\n\n", color=Fore.CYAN)
+        self.poutput(tabulate(modules, headers=('module_name', 'check', 'disclosure_date', 'description')), '\n\n')
 
     def do_set(self, args):
         if not self.module_instance:
