@@ -30,10 +30,14 @@ class Pocket(Cmd, Database):
         self.poutput(tabulate(modules, headers=('module_name', 'check', 'disclosure_date', 'description')), '\n\n')
 
     def do_set(self, args):
+        [arg, value] = args.split(" ")
+        if arg == 'debug':
+            self.debug = value
+            return None
+
         if not self.module_instance:
             raise ModuleNotUseException()
 
-        [arg, value] = args.split(" ")
         self.module_instance.options.set_option(arg, value)
 
     def do_use(self, module_name):
