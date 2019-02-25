@@ -25,7 +25,11 @@ class Pocket(Cmd):
         self.poutput("list all module")
 
     def do_set(self, args):
-        pass
+        if not self.module_instance:
+            raise ModuleNotUseException()
+
+        [arg, value] = args.split(" ")
+        self.module_instance.options.set_option(arg, value)
 
     def do_use(self, module_name):
         module_file = "{ROOT}/modules/{MODULE}.py".format(ROOT=ROOT_PATH, MODULE=module_name)
