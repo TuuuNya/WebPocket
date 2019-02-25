@@ -1,5 +1,5 @@
 from lib.cmd2 import Cmd
-from utils.files import ROOT_PATH
+from art import text2art, art
 from utils.module import name_convert
 from pathlib import Path
 from colorama import Fore, Style
@@ -23,6 +23,13 @@ class Pocket(Cmd, Database):
         Database.__init__(self)
         self.prompt = self.console_prompt + self.console_prompt_end
         self.hidden_commands.extend(['alias', 'edit', 'macro', 'py', 'pyscript', 'shell', 'shortcuts', 'load'])
+        self.do_banner(None)
+
+    def do_banner(self, args):
+        ascii_text = text2art("WebPocket", "rand")
+        self.poutput("\n\n")
+        self.poutput(ascii_text, '\n\n', color=Fore.LIGHTCYAN_EX)
+        self.poutput("{art} WebPocket has {count} modules".format(art=art("inlove"), count=self.get_module_count()), "\n\n", color=Fore.MAGENTA)
 
     def do_list(self, args):
         modules = self.get_modules()
