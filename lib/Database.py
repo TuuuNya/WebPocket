@@ -10,6 +10,7 @@ class Database:
     db_file = '{root_path}/database/pocket.db'.format(root_path=ROOT_PATH)
     connection = None
     cursor = None
+    searchable_fields = ['name', 'module_name', 'description', 'author', 'disclosure_date', 'service_name', 'service_version', 'check']
 
     def __init__(self):
         self.connection = sqlite3.connect(self.db_file)
@@ -88,5 +89,37 @@ class Database:
 
     def get_modules(self):
         sql = "select `module_name`, `check`, `disclosure_date`, `description` from modules;"
+        rs = self.cursor.execute(sql)
+        return rs.fetchall()
+
+    def search_modules(self, search_conditions):
+        name = search_conditions.get('name', '')
+        module_name = search_conditions.get('module_name', '')
+        description = search_conditions.get('description', '')
+        author = search_conditions.get('author', '')
+        disclosure_date = search_conditions.get('disclosure_date', '')
+        service_name = search_conditions.get('service_name', '')
+        service_version = search_conditions.get('service_version', '')
+        check = search_conditions.get('check', '')
+        sql = (
+            'select `module_name`, `check`, `disclosure_date`, `description` from modules where '
+            '`name` like "%{name}%" '
+            'and `module_name` like "%{module_name}%" '
+            'and `description` like "%{description}%" '
+            'and `author` like "%{author}%" '
+            'and `disclosure_date` like "%{disclosure_date}%" '
+            'and `service_name` like "%{service_name}%" '
+            'and `service_version` like "%{service_version}%" '
+            'and `check` like "%{check}%" ;'
+        ).format(
+            name=name,
+            module_name=module_name,
+            description=description,
+            author=author,
+            disclosure_date=disclosure_date,
+            service_name=service_name,
+            service_version=service_version,
+            check=check
+        )
         rs = self.cursor.execute(sql)
         return rs.fetchall()

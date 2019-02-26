@@ -33,8 +33,24 @@ class Pocket(Cmd, Database):
 
     def do_list(self, args):
         modules = self.get_modules()
-        self.poutput("Module List:", "\n\n", color=Fore.CYAN)
-        self.poutput(tabulate(modules, headers=('module_name', 'check', 'disclosure_date', 'description')), '\n\n')
+        self._print_modules(modules, "Module List:")
+
+    def do_search(self, args):
+        search_conditions = args.split(" ")
+        db_conditions = {}
+        for condition in search_conditions:
+            cd = condition.split("=")
+            if len(cd) is 1:
+                [module_name] = cd
+                db_conditions['module_name'] = module_name
+            else:
+                [field, value] = cd
+                if field in self.searchable_fields:
+                    db_conditions[field] = value
+
+        modules = self.search_modules(db_conditions)
+
+        self._print_modules(modules, 'Search results:')
 
     def do_set(self, args):
         [arg, value] = args.split(" ")
@@ -122,3 +138,7 @@ class Pocket(Cmd, Database):
             color_end=Fore.RESET
         )
         self.prompt = self.console_prompt + module_prompt + self.console_prompt_end
+
+    def _print_modules(self, modules, title):
+        self.poutput(title, "\n\n", color=Fore.CYAN)
+        self.poutput(tabulate(modules, headers=('module_name', 'check', 'disclosure_date', 'description')), '\n\n')
