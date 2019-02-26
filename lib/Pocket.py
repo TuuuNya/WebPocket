@@ -1,4 +1,4 @@
-from lib.cmd2 import Cmd
+from lib.cmd2 import Cmd, with_category
 from art import text2art, art
 from utils.module import name_convert
 from pathlib import Path
@@ -19,6 +19,10 @@ class Pocket(Cmd, Database):
     module_class = None
     module_instance = None
 
+    # command categories
+    CMD_CORE = "Core Command"
+    CMD_MODULE = "Module Command"
+
     def __init__(self):
         super(Pocket, self).__init__()
         Database.__init__(self)
@@ -26,16 +30,19 @@ class Pocket(Cmd, Database):
         self.hidden_commands.extend(['alias', 'edit', 'macro', 'py', 'pyscript', 'shell', 'shortcuts', 'load'])
         self.do_banner(None)
 
+    @with_category(CMD_CORE)
     def do_banner(self, args):
         ascii_text = text2art("WebPocket", "rand")
         self.poutput("\n\n")
         self.poutput(ascii_text, '\n\n', color=Fore.LIGHTCYAN_EX)
         self.poutput("{art} WebPocket has {count} modules".format(art=art("inlove"), count=self.get_module_count()), "\n\n", color=Fore.MAGENTA)
 
+    @with_category(CMD_MODULE)
     def do_list(self, args):
         modules = self.get_modules()
         self._print_modules(modules, "Module List:")
 
+    @with_category(CMD_MODULE)
     def do_search(self, args):
         search_conditions = args.split(" ")
         db_conditions = {}
@@ -53,6 +60,7 @@ class Pocket(Cmd, Database):
 
         self._print_modules(modules, 'Search results:')
 
+    @with_category(CMD_MODULE)
     def do_set(self, args):
         [arg, value] = args.split(" ")
         if arg == 'debug':
@@ -64,6 +72,7 @@ class Pocket(Cmd, Database):
 
         self.module_instance.options.set_option(arg, value)
 
+    @with_category(CMD_MODULE)
     def do_use(self, module_name, module_reload=False):
         module_file = name_convert(module_name)
         module_type = module_name.split("/")[0]
@@ -79,11 +88,13 @@ class Pocket(Cmd, Database):
         else:
             self.poutput("Module/Exploit not found.")
 
+    @with_category(CMD_MODULE)
     def do_back(self, args):
         self.module_name = None
         self.module_instance = None
         self.prompt = self.console_prompt + self.console_prompt_end
 
+    @with_category(CMD_MODULE)
     def do_show(self, content):
         if not self.module_instance:
             raise ModuleNotUseException()
@@ -137,9 +148,11 @@ class Pocket(Cmd, Database):
                 "\n\n"
             )
 
+    @with_category(CMD_MODULE)
     def do_run(self, args):
         self.do_exploit(args=args)
 
+    @with_category(CMD_MODULE)
     def do_exploit(self, args):
         if not self.module_instance:
             raise ModuleNotUseException()
@@ -155,10 +168,12 @@ class Pocket(Cmd, Database):
             style_end=Style.RESET_ALL
         ))
 
+    @with_category(CMD_CORE)
     def do_db_rebuild(self, args):
         self.db_rebuild()
         self.poutput("Database rebuild done.", color=Fore.GREEN)
 
+    @with_category(CMD_MODULE)
     def do_reload(self, args):
         self.do_use(self.module_name, module_reload=True)
 
