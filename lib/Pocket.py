@@ -4,7 +4,7 @@ from utils.module import name_convert
 from pathlib import Path
 from colorama import Fore, Style
 from tabulate import tabulate
-from importlib import import_module
+from importlib import import_module, reload
 from lib.Database import Database
 from lib.ExploitOption import ExploitOption
 from lib.exception.Module import ModuleNotUseException
@@ -16,6 +16,7 @@ class Pocket(Cmd, Database):
     console_prompt = "{COLOR_START}WebPocket{COLOR_END}".format(COLOR_START="\033[4m", COLOR_END="\033[0m")
     console_prompt_end = " > "
     module_name = None
+    module_class = None
     module_instance = None
 
     def __init__(self):
@@ -63,14 +64,17 @@ class Pocket(Cmd, Database):
 
         self.module_instance.options.set_option(arg, value)
 
-    def do_use(self, module_name):
+    def do_use(self, module_name, module_reload=False):
         module_file = name_convert(module_name)
         module_type = module_name.split("/")[0]
 
         if Path(module_file).is_file():
             self.module_name = module_name
-            module_class = import_module("modules.{module_name}".format(module_name=module_name.replace("/", ".")))
-            self.module_instance = module_class.Exploit()
+            if module_reload:
+                self.module_class = reload(self.module_class)
+            else:
+                self.module_class = import_module("modules.{module_name}".format(module_name=module_name.replace("/", ".")))
+            self.module_instance = self.module_class.Exploit()
             self.set_prompt(module_type=module_type, module_name=module_name)
         else:
             self.poutput("Module/Exploit not found.")
@@ -151,6 +155,9 @@ class Pocket(Cmd, Database):
     def do_db_rebuild(self, args):
         self.db_rebuild()
         self.poutput("Database rebuild done.", color=Fore.GREEN)
+
+    def do_reload(self, args):
+        self.do_use(self.module_name, module_reload=True)
 
     def set_prompt(self, module_type, module_name):
         module_prompt = " {module_type}({color}{module_name}{color_end})".format(
