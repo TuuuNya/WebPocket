@@ -137,6 +137,9 @@ class Pocket(Cmd, Database):
                 "\n\n"
             )
 
+    def do_run(self, args):
+        self.do_exploit(args=args)
+
     def do_exploit(self, args):
         if not self.module_instance:
             raise ModuleNotUseException()
