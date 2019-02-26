@@ -111,6 +111,28 @@ class Pocket(Cmd, Database):
                 "\n\n"
             )
 
+        if content == "missing":
+            missing_options = self.module_instance.get_missing_options()
+            if len(missing_options) is 0:
+                self.poutput("No option missing!", color=Fore.CYAN)
+                return None
+
+            default_options_instance = ExploitOption()
+            missing_options_table = []
+            for option in missing_options:
+                options_table_row = []
+                for field in default_options_instance.__dict__.keys():
+                    options_table_row.append(getattr(option, field))
+                missing_options_table.append(options_table_row)
+            self.poutput("Missing Module options:", "\n\n", color=Fore.CYAN)
+            self.poutput(
+                tabulate(
+                    missing_options_table,
+                    headers=default_options_instance.__dict__.keys(),
+                ),
+                "\n\n"
+            )
+
     def do_exploit(self, args):
         if not self.module_instance:
             raise ModuleNotUseException()
