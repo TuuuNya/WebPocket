@@ -41,6 +41,8 @@ class Pocket(Cmd, Database):
     def do_list(self, args):
         modules = self.get_modules()
         self._print_modules(modules, "Module List:")
+        self._print_item("The list is only retrieved from the database")
+        self._print_item("If you add some new modules, please execute `db_rebuild` first\n\n")
 
     @with_category(CMD_MODULE)
     def do_search(self, args):
