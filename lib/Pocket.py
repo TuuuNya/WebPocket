@@ -59,6 +59,8 @@ class Pocket(Cmd, Database):
         modules = self.search_modules(db_conditions)
 
         self._print_modules(modules, 'Search results:')
+        self._print_item("The search is only retrieved from the database")
+        self._print_item("If you add some new modules, please execute `db_rebuild` first\n\n")
 
     @with_category(CMD_MODULE)
     def do_set(self, args):
