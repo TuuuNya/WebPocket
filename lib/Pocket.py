@@ -169,6 +169,27 @@ class Pocket(Cmd, Database):
             style_end=Style.RESET_ALL
         ))
 
+    def do_check(self, args):
+        if not self.module_instance:
+            raise ModuleNotUseException()
+
+        exploit_result = self.module_instance.check()
+
+        if exploit_result is None:
+            self._print_item("Check Error: maybe this module does not support check or check function is valid")
+            return None
+
+        if exploit_result.status:
+            self._print_item("Check success!")
+            self._print_item(exploit_result.success_message)
+        else:
+            self._print_item("Exploit failure!", color=Fore.RED)
+            self._print_item(exploit_result.error_message, color=Fore.RED)
+        self.poutput("{style}[*]{style_end} module execution completed".format(
+            style=Fore.BLUE + Style.BRIGHT,
+            style_end=Style.RESET_ALL
+        ))
+
     @with_category(CMD_CORE)
     def do_db_rebuild(self, args):
         self.db_rebuild()
