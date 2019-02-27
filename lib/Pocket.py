@@ -171,6 +171,7 @@ class Pocket(Cmd, Database):
             style_end=Style.RESET_ALL
         ))
 
+    @with_category(CMD_MODULE)
     def do_check(self, args):
         if not self.module_instance:
             raise ModuleNotUseException()
