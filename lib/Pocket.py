@@ -158,11 +158,12 @@ class Pocket(Cmd, Database):
             raise ModuleNotUseException()
 
         exploit_result = self.module_instance.exploit()
-        self.poutput("{style}[+]{style_end} {message}".format(
-            style=Fore.YELLOW + Style.BRIGHT,
-            style_end=Style.RESET_ALL,
-            message=exploit_result,
-        ))
+        if exploit_result.status:
+            self._print_item("Exploit success!")
+            self._print_item(exploit_result.success_message)
+        else:
+            self._print_item("Exploit failure!", color=Fore.RED)
+            self._print_item(exploit_result.error_message, color=Fore.RED)
         self.poutput("{style}[*]{style_end} module execution completed".format(
             style=Fore.BLUE + Style.BRIGHT,
             style_end=Style.RESET_ALL
@@ -189,3 +190,10 @@ class Pocket(Cmd, Database):
     def _print_modules(self, modules, title):
         self.poutput(title, "\n\n", color=Fore.CYAN)
         self.poutput(tabulate(modules, headers=('module_name', 'check', 'disclosure_date', 'description')), '\n\n')
+
+    def _print_item(self, message, color=Fore.YELLOW):
+        self.poutput("{style}[+]{style_end} {message}".format(
+            style=color + Style.BRIGHT,
+            style_end=Style.RESET_ALL,
+            message=message,
+        ))
