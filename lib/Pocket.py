@@ -111,6 +111,13 @@ class Pocket(Cmd, Database):
         self.module_instance = None
         self.prompt = self.console_prompt + self.console_prompt_end
 
+    def complete_show(self, text, line, begidx, endidx):
+        if len(line.split(" ")) > 2:
+            completion_items = []
+        else:
+            completion_items = ['info', 'options', 'missing']
+        return self.basic_complete(text, line, begidx, endidx, completion_items)
+
     @with_category(CMD_MODULE)
     def do_show(self, content):
         if not self.module_instance:
