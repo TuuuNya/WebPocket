@@ -86,7 +86,10 @@ class Pocket(Cmd, Database):
         self.module_instance.options.set_option(arg, value)
 
     def complete_use(self, text, line, begidx, endidx):
-        modules = [module[0] for module in self.get_modules()]
+        if len(line.split(" ")) > 2:
+            modules = []
+        else:
+            modules = [module[0] for module in self.get_modules()]
         return self.basic_complete(text, line, begidx, endidx, modules)
 
     @with_category(CMD_MODULE)
