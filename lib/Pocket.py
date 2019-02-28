@@ -8,6 +8,7 @@ from importlib import import_module, reload
 from lib.Database import Database
 from lib.ExploitOption import ExploitOption
 from lib.exception.Module import ModuleNotUseException
+from lib.exception.Option import OptionRequired
 
 
 class Pocket(Cmd, Database):
@@ -184,6 +185,12 @@ class Pocket(Cmd, Database):
         if not self.module_instance:
             raise ModuleNotUseException()
 
+        [validate_result, validate_message] = self.module_instance.options.validate()
+        if not validate_result:
+            for error in validate_message:
+                self._print_error(error)
+            return False
+
         exploit_result = self.module_instance.exploit()
         if exploit_result.status:
             self._print_item("Exploit success!")
@@ -241,6 +248,13 @@ class Pocket(Cmd, Database):
         self.poutput(tabulate(modules, headers=('module_name', 'check', 'disclosure_date', 'description')), '\n\n')
 
     def _print_item(self, message, color=Fore.YELLOW):
+        self.poutput("{style}[+]{style_end} {message}".format(
+            style=color + Style.BRIGHT,
+            style_end=Style.RESET_ALL,
+            message=message,
+        ))
+
+    def _print_error(self, message, color=Fore.RED):
         self.poutput("{style}[+]{style_end} {message}".format(
             style=color + Style.BRIGHT,
             style_end=Style.RESET_ALL,
