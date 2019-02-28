@@ -188,7 +188,7 @@ class Pocket(Cmd, Database):
         [validate_result, validate_message] = self.module_instance.options.validate()
         if not validate_result:
             for error in validate_message:
-                self._print_error(error)
+                self._print_item(error, color=Fore.RED)
             return False
 
         exploit_result = self.module_instance.exploit()
@@ -211,7 +211,7 @@ class Pocket(Cmd, Database):
         [validate_result, validate_message] = self.module_instance.options.validate()
         if not validate_result:
             for error in validate_message:
-                self._print_error(error)
+                self._print_item(error, Fore.RED)
             return False
 
         exploit_result = self.module_instance.check()
@@ -254,13 +254,6 @@ class Pocket(Cmd, Database):
         self.poutput(tabulate(modules, headers=('module_name', 'check', 'disclosure_date', 'description')), '\n\n')
 
     def _print_item(self, message, color=Fore.YELLOW):
-        self.poutput("{style}[+]{style_end} {message}".format(
-            style=color + Style.BRIGHT,
-            style_end=Style.RESET_ALL,
-            message=message,
-        ))
-
-    def _print_error(self, message, color=Fore.RED):
         self.poutput("{style}[+]{style_end} {message}".format(
             style=color + Style.BRIGHT,
             style_end=Style.RESET_ALL,
