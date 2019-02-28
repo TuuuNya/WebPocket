@@ -208,6 +208,12 @@ class Pocket(Cmd, Database):
         if not self.module_instance:
             raise ModuleNotUseException()
 
+        [validate_result, validate_message] = self.module_instance.options.validate()
+        if not validate_result:
+            for error in validate_message:
+                self._print_error(error)
+            return False
+
         exploit_result = self.module_instance.check()
 
         if exploit_result is None:
