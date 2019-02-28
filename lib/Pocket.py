@@ -64,10 +64,6 @@ class Pocket(Cmd, Database):
         self._print_item("The search is only retrieved from the database")
         self._print_item("If you add some new modules, please execute `db_rebuild` first\n\n")
 
-    def complete_use(self, text, line, begidx, endidx):
-        modules = [module[0] for module in self.get_modules()]
-        return self.basic_complete(text, line, begidx, endidx, modules)
-
     @with_category(CMD_MODULE)
     def do_set(self, args):
         [arg, value] = args.split(" ")
@@ -79,6 +75,10 @@ class Pocket(Cmd, Database):
             raise ModuleNotUseException()
 
         self.module_instance.options.set_option(arg, value)
+
+    def complete_use(self, text, line, begidx, endidx):
+        modules = [module[0] for module in self.get_modules()]
+        return self.basic_complete(text, line, begidx, endidx, modules)
 
     @with_category(CMD_MODULE)
     def do_use(self, module_name, module_reload=False):
