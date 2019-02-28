@@ -64,6 +64,15 @@ class Pocket(Cmd, Database):
         self._print_item("The search is only retrieved from the database")
         self._print_item("If you add some new modules, please execute `db_rebuild` first\n\n")
 
+    def complete_set(self, text, line, begidx, endidx):
+        if len(line.split(" ")) > 2:
+            completion_items = []
+        else:
+            completion_items = ['debug']
+            if self.module_instance:
+                completion_items += [option.name for option in self.module_instance.options.get_options()]
+        return self.basic_complete(text, line, begidx, endidx, completion_items)
+
     @with_category(CMD_MODULE)
     def do_set(self, args):
         [arg, value] = args.split(" ")
