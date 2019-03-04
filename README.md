@@ -6,6 +6,12 @@
 
 本框架仅为沉淀安全研究成果，方便甲方公司及安全人员自测漏洞使用，请勿用于非授权的渗透测试，请使用者遵守《中华人民共和国网络安全法》，本人及公司不负任何连带法律责任
 
+<center>
+ 
+ [![asciicast](https://asciinema.org/a/Oe4dZp79yllpda95vPNit9ft5.svg)](https://asciinema.org/a/Oe4dZp79yllpda95vPNit9ft5)
+
+</center>
+
 # Document
 
 中文文档：https://webpocket.readthedocs.io/zh_CN/latest/
