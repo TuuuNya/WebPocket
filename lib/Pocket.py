@@ -8,7 +8,6 @@ from importlib import import_module, reload
 from lib.Database import Database
 from lib.ExploitOption import ExploitOption
 from lib.exception.Module import ModuleNotUseException
-from lib.exception.Option import OptionRequired
 
 
 class Pocket(Cmd, Database):
