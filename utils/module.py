@@ -1,4 +1,7 @@
+import os
 from utils.files import ROOT_PATH
+from fnmatch import fnmatchcase
+from importlib import import_module
 
 
 def name_convert(name):
@@ -8,3 +11,32 @@ def name_convert(name):
     else:
         full_name = "{ROOT}/modules/{MODULE}.py".format(ROOT=ROOT_PATH, MODULE=name)
         return full_name
+
+
+def get_local_modules():
+    local_modules = []
+    for directory_name, directories, filenames in os.walk('modules/'):
+        for filename in filenames:
+            if filename not in ['__init__.py'] \
+                    and not fnmatchcase(filename, "*.pyc") \
+                    and fnmatchcase(filename, "*.py"):
+                full_name = "{directory}/{filename}".format(directory=directory_name, filename=filename)
+                module_name = name_convert(full_name)
+                module_class = import_module("modules.{module_name}".format(
+                    module_name=module_name.replace("/", ".")
+                ))
+                module_instance = module_class.Exploit()
+                module_info = module_instance.get_info()
+                module_info['module_name'] = module_name
+                try:
+                    getattr(module_instance, 'check')
+                    module_info['check'] = 'True'
+                except AttributeError:
+                    module_info['check'] = 'False'
+                local_modules.append((
+                    module_info['module_name'],
+                    module_info['check'],
+                    module_info['disclosure_date'],
+                    module_info['description']
+                ))
+    return local_modules

@@ -1,6 +1,6 @@
 from lib.cmd2 import Cmd, with_category
 from art import text2art, art
-from utils.module import name_convert
+from utils import module
 from pathlib import Path
 from colorama import Fore, Style
 from tabulate import tabulate
@@ -40,10 +40,8 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_list(self, args):
-        modules = self.get_modules()
-        self._print_modules(modules, "Module List:")
-        self._print_item("The list is only retrieved from the database")
-        self._print_item("If you add some new modules, please execute `db_rebuild` first\n\n")
+        local_modules = module.get_local_modules()
+        self._print_modules(local_modules, "Module List:")
 
     @with_category(CMD_MODULE)
     def do_search(self, args):
@@ -63,7 +61,7 @@ class Pocket(Cmd, Database):
 
         self._print_modules(modules, 'Search results:')
         self._print_item("The search is only retrieved from the database")
-        self._print_item("If you add some new modules, please execute `db_rebuild` first\n\n")
+        self._print_item("If you add/delete some new modules, please execute `db_rebuild` first\n\n")
 
     def complete_set(self, text, line, begidx, endidx):
         if len(line.split(" ")) > 2:
@@ -95,7 +93,7 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_use(self, module_name, module_reload=False):
-        module_file = name_convert(module_name)
+        module_file = module.name_convert(module_name)
         module_type = module_name.split("/")[0]
 
         if Path(module_file).is_file():
