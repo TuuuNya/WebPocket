@@ -88,13 +88,10 @@ list
     exploits/cms/zabbix_2_0_3_sqli               False    2016-08-22         zabbix 2.0.3 jsrpc.php sqli
     exploits/cms/phpcms_9_6_0_register_getshell  True     2017-04-14         phpcms 9.6.0 register page getshell
 
-    [+] The list is only retrieved from the database
-    [+] If you add some new modules, please execute `db_rebuild` first
-
     WebPocket >
 
-注：WebPocket启动时会自动创建sqlite数据库，位于 ``database/`` 目录下， ``list`` 命令和 ``search`` 命令都是从数据库中取出的数据。
-如果新添加了模块，需要执行 ``db_rebuild`` 重新构建数据库以用于检索。
+注：WebPocket启动时会自动创建sqlite数据库，位于 ``database/`` 目录下， ``search`` 命令是从数据库中取出的数据。
+如果添加或删除了模块，需要执行 ``db_rebuild`` 重新构建数据库以用于检索。
 
 search
 ----------
