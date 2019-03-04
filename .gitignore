@@ -3,3 +3,4 @@
 *.pyc
 docs/_build/
 database/pocket.db
+venv/
