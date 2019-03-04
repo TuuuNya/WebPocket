@@ -87,7 +87,7 @@ class Pocket(Cmd, Database):
         if len(line.split(" ")) > 2:
             modules = []
         else:
-            modules = [module[0] for module in self.get_modules()]
+            modules = [local_module[0] for local_module in module.get_local_modules()]
         return self.basic_complete(text, line, begidx, endidx, modules)
 
     @with_category(CMD_MODULE)
