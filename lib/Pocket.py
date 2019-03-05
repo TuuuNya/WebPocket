@@ -1,4 +1,5 @@
-from lib.cmd2 import Cmd, with_category
+import argparse
+from lib.cmd2 import Cmd, with_category, with_argparser
 from art import text2art, art
 from utils import module
 from pathlib import Path
@@ -71,17 +72,21 @@ class Pocket(Cmd, Database):
                 completion_items += [option.name for option in self.module_instance.options.get_options()]
         return self.basic_complete(text, line, begidx, endidx, completion_items)
 
+    set_parser = argparse.ArgumentParser()
+    set_parser.add_argument("name", help="The name of the field you want to set")
+    set_parser.add_argument("value", help="The value of the field you want to set")
+
+    @with_argparser(set_parser)
     @with_category(CMD_MODULE)
     def do_set(self, args):
-        [arg, value] = args.split(" ")
-        if arg == 'debug':
-            self.debug = value
+        if args.value == 'debug':
+            self.debug = args.value
             return None
 
         if not self.module_instance:
             raise ModuleNotUseException()
 
-        self.module_instance.options.set_option(arg, value)
+        self.module_instance.options.set_option(args.name, args.value)
 
     def complete_use(self, text, line, begidx, endidx):
         if len(line.split(" ")) > 2:
