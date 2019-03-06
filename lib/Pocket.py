@@ -284,7 +284,7 @@ class Pocket(Cmd, Database):
         exploit_result = self.module_instance.check()
 
         if exploit_result is None:
-            self._print_item("Check Error: maybe this module does not support check or check function is valid")
+            self._print_item("Check Error: check function no results returned")
             return None
 
         if exploit_result.status:
