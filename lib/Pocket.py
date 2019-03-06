@@ -1,4 +1,5 @@
 import argparse
+from queue import Queue
 from lib.cmd2 import Cmd, with_category, with_argparser
 from art import text2art, art
 from utils import module
@@ -74,17 +75,30 @@ class Pocket(Cmd, Database):
 
     set_parser = argparse.ArgumentParser()
     set_parser.add_argument("name", help="The name of the field you want to set")
+    set_parser.add_argument("-f", "--file", action="store_true", help="Specify multiple targets")
     set_parser.add_argument("value", help="The value of the field you want to set")
 
     @with_argparser(set_parser)
     @with_category(CMD_MODULE)
     def do_set(self, args):
-        if args.value == 'debug':
+        if args.name == 'debug':
             self.debug = args.value
             return None
 
         if not self.module_instance:
             raise ModuleNotUseException()
+
+        # 使用 -f/--file 指定多个目标
+        if args.file and args.name in ["HOST", "TARGET"]:
+            try:
+                open(args.value, 'r')
+                self.module_instance.multi_target = True
+            except IOError as e:
+                self._print_item(e, color=Fore.RED)
+                return False
+        elif not args.file and args.name in ["HOST", "TARGET"]:
+            self.module_instance.multi_target = False
+            self.module_instance.targets = None
 
         self.module_instance.options.set_option(args.name, args.value)
 
@@ -191,6 +205,57 @@ class Pocket(Cmd, Database):
         if not validate_result:
             for error in validate_message:
                 self._print_item(error, color=Fore.RED)
+            return False
+
+        # 处理指定多个目标的情况
+        if self.module_instance.multi_target:
+            # 读取多个目标
+            target_type = self.module_instance.target_type
+            target_field = None
+
+            if target_type == "tcp":
+                target_field = "HOST"
+            elif target_type == "http":
+                target_field = "URL"
+
+            target_filename = self.module_instance.options.get_option(target_field)
+
+            try:
+                target_file = open(target_filename, 'r')
+                self.module_instance.targets = []
+                for line in target_file.readlines():
+                    self.module_instance.targets.append(line.strip())
+                self.module_instance.multi_target = True
+            except IOError as e:
+                self._print_item(e, color=Fore.RED)
+                return False
+
+            # 将targets数组中的目标写到队列中
+            targets = self.module_instance.targets
+            targets_queue = Queue()
+            for target in targets:
+                targets_queue.put(target)
+
+            while not targets_queue.empty():
+                [target, port] = module.parse_ip_port(targets_queue.get())
+
+                exp = self.module_class.Exploit()
+                exp.options.set_option(target_field, target)
+                exp.options.set_option("TIMEOUT", self.module_instance.options.get_option("TIMEOUT"))
+                if port:
+                    exp.options.set_option("PORT", port)
+                else:
+                    exp.options.set_option("PORT", self.module_instance.options.get_option("PORT"))
+
+                exploit_result = exp.exploit()
+                if exploit_result.status:
+                    self._print_item(exploit_result.success_message)
+                else:
+                    self._print_item(exploit_result.error_message, color=Fore.RED)
+            self.poutput("{style}[*]{style_end} module execution completed".format(
+                style=Fore.BLUE + Style.BRIGHT,
+                style_end=Style.RESET_ALL
+            ))
             return False
 
         exploit_result = self.module_instance.exploit()

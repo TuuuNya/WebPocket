@@ -2,6 +2,8 @@ import os
 from utils.files import ROOT_PATH
 from fnmatch import fnmatchcase
 from importlib import import_module
+from ipaddress import ip_address
+from urllib.parse import urlparse
 
 
 def name_convert(name):
@@ -40,3 +42,19 @@ def get_local_modules():
                     module_info['description']
                 ))
     return local_modules
+
+
+def parse_ip_port(netloc):
+    """
+    parse netloc to [ip, port]
+    :param netloc: string eg:127.0.0.1:80
+    :return: array eg: [127.0.0.1, 80]
+    """
+    try:
+        ip = str(ip_address(netloc))
+        port = None
+    except ValueError:
+        parsed = urlparse('//{}'.format(netloc))
+        ip = str(ip_address(parsed.hostname))
+        port = parsed.port
+    return ip, port
