@@ -89,14 +89,14 @@ class Pocket(Cmd, Database):
             raise ModuleNotUseException()
 
         # 使用 -f/--file 指定多个目标
-        if args.file and args.name in ["HOST", "TARGET"]:
+        if args.file and args.name in ["HOST", "URL"]:
             try:
                 open(args.value, 'r')
                 self.module_instance.multi_target = True
             except IOError as e:
                 self._print_item(e, color=Fore.RED)
                 return False
-        elif not args.file and args.name in ["HOST", "TARGET"]:
+        elif not args.file and args.name in ["HOST", "URL"]:
             self.module_instance.multi_target = False
             self.module_instance.targets = None
 
@@ -236,7 +236,8 @@ class Pocket(Cmd, Database):
             for target in targets:
                 targets_queue.put(target)
 
-            while not targets_queue.empty():
+            # 处理tcp类型的多目标
+            while not targets_queue.empty() and target_type == "tcp":
                 [target, port] = module.parse_ip_port(targets_queue.get())
 
                 exp = self.module_class.Exploit()
@@ -252,6 +253,21 @@ class Pocket(Cmd, Database):
                     self._print_item(exploit_result.success_message)
                 else:
                     self._print_item(exploit_result.error_message, color=Fore.RED)
+
+            # 处理http类型的多目标
+            while not targets_queue.empty() and target_type == "http":
+                target = targets_queue.get()
+
+                exp = self.module_class.Exploit()
+                exp.options.set_option(target_field, target)
+                exp.options.set_option("TIMEOUT", self.module_instance.options.get_option("TIMEOUT"))
+
+                exploit_result = exp.exploit()
+                if exploit_result.status:
+                    self._print_item(exploit_result.success_message)
+                else:
+                    self._print_item(exploit_result.error_message, color=Fore.RED)
+
             self.poutput("{style}[*]{style_end} module execution completed".format(
                 style=Fore.BLUE + Style.BRIGHT,
                 style_end=Style.RESET_ALL
@@ -310,7 +326,8 @@ class Pocket(Cmd, Database):
             for target in targets:
                 targets_queue.put(target)
 
-            while not targets_queue.empty():
+            # 处理TCP类型的多个目标
+            while not targets_queue.empty() and target_type == "tcp":
                 [target, port] = module.parse_ip_port(targets_queue.get())
                 exp = self.module_class.Exploit()
                 exp.options.set_option(target_field, target)
@@ -319,6 +336,24 @@ class Pocket(Cmd, Database):
                     exp.options.set_option("PORT", port)
                 else:
                     exp.options.set_option("PORT", self.module_instance.options.get_option("PORT"))
+
+                exploit_result = exp.check()
+
+                if exploit_result is None:
+                    self._print_item("Check Error: check function no results returned")
+                    return None
+
+                if exploit_result.status:
+                    self._print_item(exploit_result.success_message)
+                else:
+                    self._print_item(exploit_result.error_message, color=Fore.RED)
+
+            # 处理http类型的多个目标
+            while not targets_queue.empty() and target_type == "http":
+                target = targets_queue.get()
+                exp = self.module_class.Exploit()
+                exp.options.set_option(target_field, target)
+                exp.options.set_option("TIMEOUT", self.module_instance.options.get_option("TIMEOUT"))
 
                 exploit_result = exp.check()
 
