@@ -372,6 +372,7 @@ class Pocket(Cmd, Database):
             ))
             return None
 
+        # 处理单个目标的情况
         exploit_result = self.module_instance.check()
 
         if exploit_result is None:
