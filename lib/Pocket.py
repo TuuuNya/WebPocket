@@ -30,7 +30,6 @@ class Pocket(Cmd, Database):
     def __init__(self):
         super(Pocket, self).__init__()
         Database.__init__(self)
-        self.thread_pool = list()
         self.prompt = self.console_prompt + self.console_prompt_end
         self.hidden_commands.extend(['alias', 'edit', 'macro', 'py', 'pyscript', 'shell', 'shortcuts', 'load'])
         self.do_banner(None)
@@ -264,8 +263,8 @@ class Pocket(Cmd, Database):
             for target in targets:
                 targets_queue.put(target)
 
-            # 处理tcp类型的多目标
-            if not targets_queue.empty() and target_type == "tcp":
+            # 用多线程来处理多目标的情况
+            if not targets_queue.empty():
                 thread_count = int(self.module_instance.options.get_option("THREADS"))
                 thread_queue = Queue(maxsize=thread_count)
 
@@ -277,7 +276,6 @@ class Pocket(Cmd, Database):
                         target = targets_queue.get()
                         thread_queue.put(1)
                         _thread = threading.Thread(target=self.exploit_thread, args=(target, target_type, thread_queue))
-                        self.thread_pool.append(_thread)
                         _thread.start()
 
                     while not thread_queue.empty():
@@ -287,19 +285,6 @@ class Pocket(Cmd, Database):
                     while threading.activeCount() > 1:
                         time.sleep(0.5)
                     return None
-
-            # 处理http类型的多目标
-            while not targets_queue.empty() and target_type == "http":
-                thread_count = int(self.module_instance.options.get_option("THREADS"))
-
-                for i in range(thread_count):
-                    _thread = Thread(target=self.exploit_thread, args=(targets_queue, target_type))
-                    _thread.start()
-                    self.thread_pool.append(_thread)
-
-                for th in self.thread_pool:
-                    th.join()
-                self.thread_pool.clear()
 
             self.poutput("{style}[*]{style_end} module execution completed".format(
                 style=Fore.BLUE + Style.BRIGHT,
@@ -319,36 +304,30 @@ class Pocket(Cmd, Database):
             style_end=Style.RESET_ALL
         ))
 
-    def check_thread(self, targets_queue, target_type):
-        while not targets_queue.empty():
-            target = None
-            target_field = None
-            port = None
+    def check_thread(self, target, target_type, thread_queue):
+        target_field = None
+        port = None
 
-            if target_type == "tcp":
-                [target, port] = module.parse_ip_port(targets_queue.get())
-                target_field = "HOST"
-            elif target_type == "http":
-                target = targets_queue.get()
-                target_field = "URL"
-            exp = self.module_class.Exploit()
-            exp.options.set_option(target_field, target)
-            exp.options.set_option("TIMEOUT", self.module_instance.options.get_option("TIMEOUT"))
-            if port:
-                exp.options.set_option("PORT", port)
-            else:
-                exp.options.set_option("PORT", self.module_instance.options.get_option("PORT"))
+        if target_type == "tcp":
+            [target, port] = module.parse_ip_port(target)
+            target_field = "HOST"
+        elif target_type == "http":
+            target_field = "URL"
+        exp = self.module_class.Exploit()
+        exp.options.set_option(target_field, target)
+        exp.options.set_option("TIMEOUT", self.module_instance.options.get_option("TIMEOUT"))
+        if port:
+            exp.options.set_option("PORT", port)
+        else:
+            exp.options.set_option("PORT", self.module_instance.options.get_option("PORT"))
 
-            exploit_result = exp.check()
+        exploit_result = exp.check()
 
-            if exploit_result is None:
-                self._print_item("Check Error: check function no results returned")
-                return None
-
-            if exploit_result.status:
-                self._print_item(exploit_result.success_message)
-            else:
-                self._print_item(exploit_result.error_message, color=Fore.RED)
+        if exploit_result.status:
+            self._print_item(exploit_result.success_message)
+        else:
+            self._print_item(exploit_result.error_message, color=Fore.RED)
+        thread_queue.get(1)
 
     @with_category(CMD_MODULE)
     def do_check(self, args):
@@ -390,31 +369,29 @@ class Pocket(Cmd, Database):
             for target in targets:
                 targets_queue.put(target)
 
-            # 处理TCP类型的多个目标
-            while not targets_queue.empty() and target_type == "tcp":
+            # 用多线程来处理多目标的情况
+            if not targets_queue.empty():
                 thread_count = int(self.module_instance.options.get_option("THREADS"))
+                thread_queue = Queue(maxsize=thread_count)
 
-                for i in range(thread_count):
-                    _thread = Thread(target=self.check_thread, args=(targets_queue, target_type))
-                    _thread.start()
-                    self.thread_pool.append(_thread)
+                try:
+                    while not targets_queue.empty():
+                        while thread_queue.full():
+                            time.sleep(0.1)
 
-                for th in self.thread_pool:
-                    th.join()
-                self.thread_pool.clear()
+                        target = targets_queue.get()
+                        thread_queue.put(1)
+                        _thread = threading.Thread(target=self.check_thread,
+                                                   args=(target, target_type, thread_queue))
+                        _thread.start()
 
-            # 处理http类型的多个目标
-            while not targets_queue.empty() and target_type == "http":
-                thread_count = int(self.module_instance.options.get_option("THREADS"))
-
-                for i in range(thread_count):
-                    _thread = Thread(target=self.check_thread, args=(targets_queue, target_type))
-                    _thread.start()
-                    self.thread_pool.append(_thread)
-
-                for th in self.thread_pool:
-                    th.join()
-                self.thread_pool.clear()
+                    while not thread_queue.empty():
+                        time.sleep(0.1)
+                except KeyboardInterrupt:
+                    self._print_item("Wait for existing process to exit...", color=Fore.RED)
+                    while threading.activeCount() > 1:
+                        time.sleep(0.5)
+                    return None
 
             self.poutput("{style}[*]{style_end} module execution completed".format(
                 style=Fore.BLUE + Style.BRIGHT,
