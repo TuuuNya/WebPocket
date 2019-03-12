@@ -1,5 +1,12 @@
 # WebPocket
 
+![Python Version](https://img.shields.io/badge/Python-3.7-brightgreen.svg?style=flat-square)
+![GitHub](https://img.shields.io/github/license/TuuuNya/WebPocket.svg?style=flat-square)
+![GitHub repo size in bytes](https://img.shields.io/github/repo-size/TuuuNya/WebPocket.svg?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues-raw/TuuuNya/WebPocket.svg?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/TuuuNya/WebPocket.svg?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/TuuuNya/WebPocket.svg?style=flat-square)
+
 **WebPocket** 是一个轻量级渗透测试辅助框架，使用Python3.7构建，整体思路借鉴自 [Metasploit](https://www.metasploit.com/) 。
 
 包含 `use`, `search`, `list`, `show`, `exploit` 等命令，可通过`help`命令查看全部命令。
