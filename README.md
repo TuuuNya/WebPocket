@@ -8,7 +8,7 @@
 
 <center>
  
- [![asciicast](https://asciinema.org/a/Oe4dZp79yllpda95vPNit9ft5.svg)](https://asciinema.org/a/Oe4dZp79yllpda95vPNit9ft5)
+[![asciicast](https://asciinema.org/a/raZSJd6UnpwhR2w3uGlBgwvgA.svg)](https://asciinema.org/a/raZSJd6UnpwhR2w3uGlBgwvgA)
 
 </center>
 
