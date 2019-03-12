@@ -4,3 +4,4 @@ wcwidth==0.1.7
 pyperclip==1.7.0
 art==3.0
 tabulate==0.8.3
+requests==2.21.0
