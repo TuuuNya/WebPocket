@@ -36,6 +36,7 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_CORE)
     def do_banner(self, args):
+        """Print WebPocket banner"""
         ascii_text = text2art("WebPocket", "rand")
         self.poutput("\n\n")
         self.poutput(ascii_text, '\n\n', color=Fore.LIGHTCYAN_EX)
@@ -43,11 +44,21 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_list(self, args):
+        """List all modules"""
         local_modules = module.get_local_modules()
         self._print_modules(local_modules, "Module List:")
 
     @with_category(CMD_MODULE)
     def do_search(self, args):
+        """
+        Search modules
+
+        Support fields:
+            name, module_name, description, author, disclosure_date, service_name, service_version, check
+        Eg:
+            search redis
+            search service_name=phpcms  service_version=9.6.0
+        """
         search_conditions = args.split(" ")
         db_conditions = {}
         for condition in search_conditions:
@@ -83,6 +94,7 @@ class Pocket(Cmd, Database):
     @with_argparser(set_parser)
     @with_category(CMD_MODULE)
     def do_set(self, args):
+        """Set module option value/ set program config"""
         if args.name == 'debug':
             self.debug = args.value
             return None
@@ -113,6 +125,7 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_use(self, module_name, module_reload=False):
+        """Chose a module"""
         module_file = module.name_convert(module_name)
         module_type = module_name.split("/")[0]
 
@@ -129,6 +142,7 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_back(self, args):
+        """Clear module that chose"""
         self.module_name = None
         self.module_instance = None
         self.prompt = self.console_prompt + self.console_prompt_end
@@ -142,6 +156,14 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_show(self, content):
+        """
+        Display module information
+
+        Eg:
+            show info
+            show options
+            show missing
+        """
         if not self.module_instance:
             raise ModuleNotUseException()
 
@@ -196,6 +218,7 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_run(self, args):
+        """alias to exploit"""
         self.do_exploit(args=args)
 
     def exploit_thread(self, target, target_type, thread_queue):
@@ -225,6 +248,7 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_exploit(self, args):
+        """Execute module exploit"""
         if not self.module_instance:
             raise ModuleNotUseException()
 
@@ -331,6 +355,7 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_MODULE)
     def do_check(self, args):
+        """Execute module check"""
         if not self.module_instance:
             raise ModuleNotUseException()
 
@@ -419,11 +444,13 @@ class Pocket(Cmd, Database):
 
     @with_category(CMD_CORE)
     def do_db_rebuild(self, args):
+        """Rebuild database for search"""
         self.db_rebuild()
         self.poutput("Database rebuild done.", color=Fore.GREEN)
 
     @with_category(CMD_MODULE)
     def do_reload(self, args):
+        """reload the chose module"""
         self.do_use(self.module_name, module_reload=True)
 
     def set_prompt(self, module_type, module_name):
