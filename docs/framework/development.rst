@@ -18,7 +18,7 @@
  * ``Exploit`` 类必须继承自 ``BaseExploit`` （通过 ``from lib.BaseExploit import BaseExploit`` 引入 ）
  * 模块必须包含 ``__init__`` 方法，必须调用父类的 ``__init__`` 方法，（通过 ``super(Exploit, self).__init__()`` 调用）
  * 模块必须填写相关信息，使用 ``self.update_info()`` 方法
- * POC的目标目前主要分为 ``http`` 和 ``tcp`` 类型，使用 ``self.register_tcp_target()`` 注册tcp类型的目标。 使用 ``self.register_tcp_target()`` 注册http类型的目标。
+ * POC的目标目前主要分为 ``http`` 和 ``tcp`` 类型，使用 ``self.register_tcp_target()`` 注册tcp类型的目标。 使用 ``self.register_http_target()`` 注册http类型的目标。
  * 注册以后的目标可以使用 ``self.options.get_option`` 获取其中的参数。
  * ``check`` 方法用来实现检测漏洞，不可存在攻击行为。
  * ``exploit`` 方法用来实现攻击行为，但也不可进行影响服务器正常运行的操作。
